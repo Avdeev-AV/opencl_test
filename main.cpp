@@ -28,7 +28,7 @@ int main() {
     {
         cl_platform_id* platforms = new cl_platform_id[num_platforms];
         clGetPlatformIDs(num_platforms, platforms, NULL);
-        platform = platforms[0];
+        platform = platforms[1];
         char platformName[128];
         clGetPlatformInfo(platform, CL_PLATFORM_NAME, 128, platformName, NULL);
         std::cout << platformName << " " << num_platforms << std::endl;
@@ -36,13 +36,13 @@ int main() {
     }
     //Device
     cl_uint num_devices = 0;
-    clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &num_devices);
+    clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices);
     cl_device_id device = NULL;
     
     if (0 < num_devices)
     {
         cl_device_id* devices = new cl_device_id[num_devices];
-        clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, num_devices, devices, nullptr);
+        clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, num_devices, devices, nullptr);
         device = devices[0];
         char deviceName[128];
         clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, NULL);
@@ -51,7 +51,7 @@ int main() {
     }
     //Context
     cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0 };
-    cl_context context = clCreateContextFromType((NULL == platform) ? NULL: properties, CL_DEVICE_TYPE_GPU, NULL, NULL, NULL);
+    cl_context context = clCreateContextFromType((NULL == platform) ? NULL: properties, CL_DEVICE_TYPE_ALL, NULL, NULL, NULL);
     clGetContextInfo(context, CL_CONTEXT_DEVICES, 0, NULL, 0);
             
 
@@ -91,7 +91,11 @@ int main() {
     //Launch kernel
     size_t group;
     clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &group, NULL);
-    clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &arr_size, &group, 0, NULL, NULL);
+    int err = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &arr_size, &group, 0, NULL, NULL);
+    if (err)
+    {
+        std::cout << "Something went wrong here " << err << std::endl;
+    }
 
     clFinish(command_queue);
 
