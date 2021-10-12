@@ -4,7 +4,7 @@
 #else
 #include <CL/cl.h>
 #endif
-//#define SIZE 32
+
 
 const char * Kernelsource =                                                        "\n" \
 "__kernel void sq(__global int* input, __global int* output, const unsigned int count)                    \n" \
@@ -58,9 +58,9 @@ int main() {
     size_t srclen[] = { strlen(Kernelsource) };
     cl_program program = clCreateProgramWithSource(context, 1, &Kernelsource, srclen, NULL);
     clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-    cl_kernel kernel = clCreateKernel(program, "sq", NULL);
-    //cl_kernel kernel = getKernel(Kernelsource, context, device_id);
 
+    //Kernel
+    cl_kernel kernel = clCreateKernel(program, "sq", NULL);
     const size_t arr_size = 32;
     float data[arr_size];
     float results[arr_size];
@@ -78,8 +78,8 @@ int main() {
 
     unsigned int count = arr_size;
     clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &output);
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &count);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
+    clSetKernelArg(kernel, 2, sizeof(cl_mem), &count);
 
     size_t group;
 
@@ -88,13 +88,11 @@ int main() {
 
     clFinish(command_queue);
 
-    //int result[arr_size];
     clEnqueueReadBuffer(command_queue, output, CL_TRUE, 0, sizeof(float) * count, results, 0, NULL, NULL);
     for (int i = 0; i < arr_size; i++)
     {
         std::cout << results[i] << std::endl;
     }
-    
 
     clReleaseMemObject(input);
     clReleaseMemObject(output);
