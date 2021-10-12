@@ -19,7 +19,6 @@ const char * source =                                                           
 "}";
 
 int main() {
-    clock_t tStart = clock();
     //Platform
     cl_uint num_platforms = 0;
     clGetPlatformIDs(0, nullptr, &num_platforms);
@@ -30,7 +29,7 @@ int main() {
     {
         cl_platform_id* platforms = new cl_platform_id[num_platforms];
         clGetPlatformIDs(num_platforms, platforms, NULL);
-        platform = platforms[0];
+        platform = platforms[1];
         char platformName[128];
         clGetPlatformInfo(platform, CL_PLATFORM_NAME, 128, platformName, NULL);
         std::cout << platformName << " " << num_platforms << std::endl;
@@ -89,10 +88,11 @@ int main() {
     clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
     clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
     clSetKernelArg(kernel, 2, sizeof(unsigned int), &count);
-
+    
     //Launch kernel
     size_t group;
     clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &group, NULL);
+    clock_t tStart = clock();
     int err = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &arr_size, &group, 0, NULL, NULL);
     if (err)
     {
@@ -100,14 +100,15 @@ int main() {
     }
 
     clFinish(command_queue);
-
+    clock_t tFinish = clock();
     clEnqueueReadBuffer(command_queue, output, CL_TRUE, 0, sizeof(float) * count, results, 0, NULL, NULL);
+    
     for (int i = 0; i < arr_size; i++)
     {
         std::cout << results[i] << std::endl;
     }
 
-    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+    
     //Release
     clReleaseMemObject(input);
     clReleaseMemObject(output);
@@ -115,6 +116,6 @@ int main() {
     clReleaseKernel(kernel);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
-    
+    printf("Time taken: %.2fs\n", (double)(tFinish - tStart) / CLOCKS_PER_SEC);
     return 0;
 }
