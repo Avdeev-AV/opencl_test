@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 #ifdef __APPLE__
 #include <OpenCL/cl.h>
 #else
@@ -18,6 +19,7 @@ const char * source =                                                           
 "}";
 
 int main() {
+    clock_t tStart = clock();
     //Platform
     cl_uint num_platforms = 0;
     clGetPlatformIDs(0, nullptr, &num_platforms);
@@ -28,7 +30,7 @@ int main() {
     {
         cl_platform_id* platforms = new cl_platform_id[num_platforms];
         clGetPlatformIDs(num_platforms, platforms, NULL);
-        platform = platforms[1];
+        platform = platforms[0];
         char platformName[128];
         clGetPlatformInfo(platform, CL_PLATFORM_NAME, 128, platformName, NULL);
         std::cout << platformName << " " << num_platforms << std::endl;
@@ -105,6 +107,7 @@ int main() {
         std::cout << results[i] << std::endl;
     }
 
+    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
     //Release
     clReleaseMemObject(input);
     clReleaseMemObject(output);
@@ -112,5 +115,6 @@ int main() {
     clReleaseKernel(kernel);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
+    
     return 0;
 }
