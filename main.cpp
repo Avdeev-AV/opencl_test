@@ -8,7 +8,7 @@
 
     //Kernel
 const char * source =                                                                    "\n" \
-"__kernel void sq (__global int * input, __global int * output, const unsigned int count)          \n" \
+"__kernel void code (__global int * input, __global int * output, const unsigned int count)          \n" \
 "{                                                                                              \n" \
 "    int i = get_global_id(0);                                                                  \n" \
 "    int block = get_group_id(0);                                                               \n" \
@@ -65,9 +65,9 @@ int main() {
     clBuildProgram(program, 1, &device, NULL, NULL, NULL);
 
     //Kernel
-    cl_kernel kernel = clCreateKernel(program, "sq", NULL);
+    cl_kernel kernel = clCreateKernel(program, "code", NULL);
 
-    const size_t arr_size = 1024;
+    const size_t arr_size = 4096;
     int results[arr_size];
 
     //Input array
@@ -105,7 +105,7 @@ int main() {
     
     for (int i = 0; i < arr_size; i++)
     {
-        std::cout << results[i] << std::endl;
+        std::cout << results[i] << " ";
     }
 
     
@@ -116,6 +116,6 @@ int main() {
     clReleaseKernel(kernel);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
-    printf("Time taken: %.2fs\n", (double)(tFinish - tStart) / CLOCKS_PER_SEC);
+    printf("\n\nTime taken: %.2fs\n", (double)(tFinish - tStart) / CLOCKS_PER_SEC);
     return 0;
 }
